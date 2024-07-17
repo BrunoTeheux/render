@@ -1,7 +1,20 @@
 import React, { useState, useRef } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import html2canvas from 'html2canvas';
+
+// Function to determine the correct basename
+const getBasename = () => {
+  const { pathname } = window.location;
+  // Check if running in development or production
+  if (process.env.NODE_ENV === 'development') {
+    return '/';
+  }
+  // Extract the base path for production
+  const basePathMatch = pathname.match(/^\/~[^/]+/);
+  return basePathMatch ? basePathMatch[0] : '/';
+};
 
 const LatexRenderer = () => {
   const [equation, setEquation] = useState('f(x) = \\int_{-\\infty}^\\infty \\hat f(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi');
@@ -76,48 +89,50 @@ const LatexRenderer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
-      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
-        <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
-          <div className="max-w-md mx-auto">
-            <h1 className="text-2xl font-semibold mb-6 text-center text-gray-900">LaTeX Equation Renderer</h1>
-            <div className="divide-y divide-gray-200">
-              <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
-                <div className="flex flex-col">
-                  <label className="leading-loose">Enter LaTeX Equation</label>
-                  <textarea
-                    className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
-                    rows="4"
-                    value={equation}
-                    onChange={(e) => setEquation(e.target.value)}
-                    placeholder="Enter LaTeX equation..."
-                  />
-                </div>
-                <div 
-                  ref={renderedEqRef}
-                  className="px-4 py-5 bg-white sm:p-6 shadow sm:rounded-tl-md sm:rounded-tr-md overflow-x-auto"
-                  dangerouslySetInnerHTML={renderEquation()} 
-                />
-                <div className="pt-4 flex items-center space-x-4">
-                  <button 
-                    className="bg-blue-500 flex justify-center items-center w-full text-white px-4 py-3 rounded-md focus:outline-none hover:bg-blue-600 transition duration-300 ease-in-out"
-                    onClick={copyToClipboard}
-                  >
-                    Copy to Clipboard
-                  </button>
-                </div>
-                {status && (
-                  <div className={`mt-3 text-center ${status.type === 'error' ? 'text-red-500' : 'text-green-500'}`}>
-                    {status.message}
+    <Router basename={getBasename()}>
+      <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+        <div className="relative py-3 sm:max-w-xl sm:mx-auto">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+          <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+            <div className="max-w-md mx-auto">
+              <h1 className="text-2xl font-semibold mb-6 text-center text-gray-900">LaTeX Equation Renderer</h1>
+              <div className="divide-y divide-gray-200">
+                <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+                  <div className="flex flex-col">
+                    <label className="leading-loose">Enter LaTeX Equation</label>
+                    <textarea
+                      className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
+                      rows="4"
+                      value={equation}
+                      onChange={(e) => setEquation(e.target.value)}
+                      placeholder="Enter LaTeX equation..."
+                    />
                   </div>
-                )}
+                  <div 
+                    ref={renderedEqRef}
+                    className="px-4 py-5 bg-white sm:p-6 shadow sm:rounded-tl-md sm:rounded-tr-md overflow-x-auto"
+                    dangerouslySetInnerHTML={renderEquation()} 
+                  />
+                  <div className="pt-4 flex items-center space-x-4">
+                    <button 
+                      className="bg-blue-500 flex justify-center items-center w-full text-white px-4 py-3 rounded-md focus:outline-none hover:bg-blue-600 transition duration-300 ease-in-out"
+                      onClick={copyToClipboard}
+                    >
+                      Copy to Clipboard
+                    </button>
+                  </div>
+                  {status && (
+                    <div className={`mt-3 text-center ${status.type === 'error' ? 'text-red-500' : 'text-green-500'}`}>
+                      {status.message}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Router>
   );
 };
 
